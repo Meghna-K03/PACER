@@ -50,10 +50,9 @@ if __name__ == "__main__":
     print("=" * 40)
 
     result = generate_questions(
-        branch="Computer Science",
-        company="TCS",
-        cgpa="7.8",
-        skills="Python, Java, SQL"
-    )
-
+    branch="Computer Science",
+    company="Infosys",
+    cgpa="7.8",
+    skills="Python, Java, SQL"
+)
     print(result)
