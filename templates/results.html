@@ -7,19 +7,32 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-
     <div class="container">
         <div class="header">
             <h1>PACER 🎯</h1>
             <p>Here are your {{ company }} interview questions, {{ name }}!</p>
+            <p style="font-size:13px; color:#888;">
+                Total sessions completed: {{ session_count }}
+            </p>
         </div>
 
         <div class="results">
             {{ questions }}
         </div>
 
-        <a href="/" class="back-button">← Generate for another company</a>
-    </div>
+        {% if past_sessions|length > 1 %}
+        <div class="history">
+            <h3>Your Past Sessions</h3>
+            {% for session in past_sessions[1:] %}
+            <div class="session-card">
+                <span class="session-company">{{ session.company }}</span>
+                <span class="session-date">{{ session.created_at[:10] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
+        <a href="/" class="back-button">← Prep for another company</a>
+    </div>
 </body>
 </html>
