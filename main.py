@@ -1,5 +1,8 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+
+import shutil
+import os
+from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from question_generator import generate_questions
@@ -57,3 +60,39 @@ async def generate(
             "session_count": len(past_sessions)
         }
     )
+
+
+@app.get("/interview", response_class=HTMLResponse)
+async def interview_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="interview.html"
+    )
+
+@app.post("/score-answer")
+async def score_answer_route(
+    request: Request,
+    audio: UploadFile = File(...),
+    question: str = Form(...),
+    company: str = Form(...)
+):
+    from voice_interview import transcribe_audio, score_answer
+
+    # Save uploaded audio temporarily
+    temp_path = f"temp_audio_{audio.filename}"
+    with open(temp_path, "wb") as buffer:
+        shutil.copyfileobj(audio.file, buffer)
+
+    # Transcribe
+    transcript = transcribe_audio(temp_path)
+
+    # Score
+    feedback = score_answer(question, transcript, company)
+
+    # Clean up temp file
+    os.remove(temp_path)
+
+    return JSONResponse({
+        "transcript": transcript,
+        "feedback": feedback
+    })
