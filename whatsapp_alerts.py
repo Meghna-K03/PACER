@@ -42,7 +42,7 @@ def send_test_message(phone_number):
     """Send a test message to verify setup"""
     message = """Namaste! 🎯
 
-PACER yahan hai — aapka AI placement prep agent!
+PACER here — aapka AI placement prep agent!
 
 Main har roz subah 8 baje aapke liye naye job opportunities dhundhunga aur aapko alert karunga.
 

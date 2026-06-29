@@ -1,7 +1,7 @@
 import os
 from apscheduler.schedulers.blocking import BlockingScheduler
 from dotenv import load_dotenv
-from scraper import scrape_internshala, match_jobs_to_student
+from scraper import search_jobs, match_jobs_to_student
 from whatsapp_alerts import send_job_alert
 from database import supabase
 
@@ -25,7 +25,7 @@ def morning_job_alert():
     students = get_all_students()
     print(f"Found {len(students)} students")
     
-    jobs = scrape_internshala("software engineer")
+    jobs = search_jobs("software engineer", "india")
     print(f"Found {len(jobs)} jobs")
     
     for student in students:
