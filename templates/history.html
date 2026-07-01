@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PACER - My History</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/">🏠 Home</a>
+    <a href="/interview">🎤 Voice Interview</a>
+    <a href="/history" class="active">📊 My History</a>
+</nav>
+
+<div class="container">
+    <div class="header">
+        <h1>PACER 🎯</h1>
+        <p>Your Prep History</p>
+    </div>
+
+    <div class="form-group">
+        <label>Enter your email to see your history</label>
+        <input type="email" id="email" placeholder="Enter your email">
+        <button onclick="loadHistory()" style="margin-top:10px;">
+            View My History
+        </button>
+    </div>
+
+    <div id="history-result" style="display:none;">
+        <h3 id="student-name" style="margin-bottom:16px;"></h3>
+        <div id="sessions-list"></div>
+    </div>
+
+    <div id="no-history" style="display:none; text-align:center; color:#888; padding:20px;">
+        No sessions found for this email. 
+        <a href="/">Start your first session →</a>
+    </div>
+
+</div>
+
+<script>
+async function loadHistory() {
+    const email = document.getElementById('email').value;
+    if (!email) return;
+
+    const response = await fetch(`/get-history?email=${email}`);
+    const data = await response.json();
+
+    if (!data.student) {
+        document.getElementById('no-history').style.display = 'block';
+        document.getElementById('history-result').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('student-name').textContent =
+        `${data.student.name} — ${data.sessions.length} sessions completed`;
+
+    const list = document.getElementById('sessions-list');
+    list.innerHTML = '';
+
+    data.sessions.forEach(session => {
+        list.innerHTML += `
+            <div class="session-card">
+                <span class="session-company">🏢 ${session.company}</span>
+                <span class="session-date">${session.created_at.slice(0,10)}</span>
+            </div>
+        `;
+    });
+
+    document.getElementById('history-result').style.display = 'block';
+    document.getElementById('no-history').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from question_generator import generate_questions
 from database import save_student, save_session, get_student_by_email, get_student_sessions
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -96,4 +97,25 @@ async def score_answer_route(
     return JSONResponse({
         "transcript": transcript,
         "feedback": feedback
+    })
+
+
+
+@app.get("/history", response_class=HTMLResponse)
+async def history_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="history.html"
+    )
+
+@app.get("/get-history")
+async def get_history(email: str):
+    student = get_student_by_email(email)
+    if not student:
+        return JSONResponse({"student": None, "sessions": []})
+    
+    sessions = get_student_sessions(student["id"])
+    return JSONResponse({
+        "student": student,
+        "sessions": sessions
     })
