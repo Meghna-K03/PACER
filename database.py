@@ -9,14 +9,15 @@ supabase = create_client(
     os.getenv("SUPABASE_KEY")
 )
 
-def save_student(name, email, branch, cgpa, skills):
+def save_student(name, email, branch, cgpa, skills, phone=None):
     try:
         result = supabase.table("students").insert({
             "name": name,
             "email": email,
             "branch": branch,
             "cgpa": cgpa,
-            "skills": skills
+            "skills": skills,
+            "phone": phone
         }).execute()
         return result.data[0]
     except Exception as e:

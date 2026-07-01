@@ -25,6 +25,7 @@ async def generate(
     request: Request,
     name: str = Form(...),
     email: str = Form(...),
+    phone: str = Form(...),
     branch: str = Form(...),
     company: str = Form(...),
     cgpa: str = Form(...),
@@ -35,7 +36,7 @@ async def generate(
     
     # If new student, save them
     if not student:
-        student = save_student(name, email, branch, cgpa, skills)
+      student = save_student(name, email, branch, cgpa, skills, phone)
     
     # Generate questions
     questions = generate_questions(branch, company, cgpa, skills)
