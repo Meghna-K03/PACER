@@ -159,7 +159,10 @@ async function submitAudio(audioBlob) {
 
         const data = await response.json();
 
-        document.getElementById('transcript').textContent = data.transcript;
+       document.getElementById('transcript').textContent = 
+    data.transcript && data.transcript.trim() 
+    ? data.transcript 
+    : "(Audio received but speech unclear — try speaking louder and closer to mic)";
         document.getElementById('feedback').textContent = data.feedback;
         document.getElementById('result').style.display = 'block';
         document.getElementById('startBtn').style.display = 'inline-block';
