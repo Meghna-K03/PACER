@@ -176,3 +176,41 @@ textarea {
 .navbar a.active {
     background: #3498db;
 }
+
+.results h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin: 20px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+}
+
+.results p {
+    margin-bottom: 10px;
+    line-height: 1.7;
+    color: #444;
+}
+
+.results strong {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.results ol, .results ul {
+    padding-left: 20px;
+    margin-bottom: 10px;
+}
+
+.results ol li, .results ul li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+    color: #444;
+}
+
+.results h1, .results h2 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin: 24px 0 10px;
+}

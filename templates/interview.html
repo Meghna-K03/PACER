@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PACER - Voice Interview</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 </head>
 <body>
     
@@ -163,7 +164,7 @@ async function submitAudio(audioBlob) {
     data.transcript && data.transcript.trim() 
     ? data.transcript 
     : "(Audio received but speech unclear — try speaking louder and closer to mic)";
-        document.getElementById('feedback').textContent = data.feedback;
+        document.getElementById('feedback').innerHTML = marked.parse(data.feedback);
         document.getElementById('result').style.display = 'block';
         document.getElementById('startBtn').style.display = 'inline-block';
         document.getElementById('status').textContent = 'Done! See your feedback below.';
