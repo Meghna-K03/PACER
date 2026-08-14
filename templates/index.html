@@ -1,86 +1,231 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PACER - Placement Prep Agent</title>
-    <link rel="stylesheet" href="/static/style.css">
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>PACER.AI - Get Placed.</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: { extend: { colors: {
+        "on-background": "#e1e2eb", "background": "#10131a", "surface-base": "#0f1117",
+        "surface-container": "#1d2026", "surface-container-high": "#272a31",
+        "surface-container-low": "#191c22", "surface-container-lowest": "#0b0e14",
+        "on-surface": "#e1e2eb", "on-surface-variant": "#ccc3d8",
+        "primary": "#d2bbff", "primary-container": "#7c3aed", "primary-fixed": "#eaddff",
+        "secondary": "#cebdff", "glass-fill": "#ffffff08", "glass-stroke": "#ffffff18",
+        "accent-tint": "#6c63ff18", "outline-variant": "#4a4455"
+    } } }
+}
+</script>
+<link rel="stylesheet" href="/static/theme.css">
 </head>
-<body>
+<body class="bg-surface-base text-on-background min-h-screen flex flex-col pt-[72px] relative overflow-x-hidden">
 
-<nav class="navbar">
-    <a href="/" class="active">🏠 Home</a>
-    <a href="/interview">🎤 Voice Interview</a>
-    <a href="/history">📊 My History</a>
-</nav>
+<canvas id="shader-bg"></canvas>
 
-<div class="container">
-    <div class="header">
-        <h1>PACER 🎯</h1>
-        <p>Your AI-powered placement prep agent</p>
+<!-- Login Modal -->
+<div class="modal-bg" id="loginModal">
+  <div class="bg-surface-container-high border border-glass-stroke rounded-xl p-8 w-full max-w-sm relative shadow-2xl">
+    <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
+      <i class="ti ti-x text-xl"></i>
+    </button>
+    <div class="flex items-center gap-2 mb-1">
+      <i class="ti ti-brain text-2xl text-primary-container"></i>
+      <span class="font-semibold text-lg text-on-background">PACER.AI</span>
     </div>
-
-    <form action="/generate" method="post" onsubmit="showLoading()">
-
-        <div class="form-group">
-            <label>Your Name</label>
-            <input type="text" name="name" placeholder="Enter your name" required>
-        </div>
-
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" name="email" placeholder="Enter your email" required>
-        </div>
-
-        <div class="form-group">
-            <label>Phone Number (for WhatsApp alerts)</label>
-            <input type="text" name="phone" placeholder="eg. 9876543210 (without +91)" required>
-        </div>
-
-        <div class="form-group">
-            <label>Branch</label>
-            <input type="text" name="branch" placeholder="eg. Computer Science" required>
-        </div>
-
-        <div class="form-group">
-            <label>Target Company</label>
-            <input type="text" name="company" placeholder="eg. TCS, Infosys, Google" required>
-        </div>
-
-        <div class="form-group">
-            <label>CGPA</label>
-            <input type="text" name="cgpa" placeholder="eg. 7.8" required>
-        </div>
-
-        <div class="form-group">
-            <label>Your Skills</label>
-            <input type="text" name="skills" placeholder="eg. Python, Java, SQL" required>
-        </div>
-
-        <button type="submit" id="submit-btn">
-            Generate My Questions 🚀
-        </button>
-
-    </form>
-
-    <div id="loading" style="display:none; text-align:center; padding:30px;">
-        <div class="spinner"></div>
-        <p style="color:#666; margin-top:16px; font-size:15px;">
-            PACER is preparing your questions...
-        </p>
-        <p style="color:#888; font-size:13px;">
-            This takes about 10-15 seconds
-        </p>
-    </div>
-
+    <p class="text-on-surface-variant text-sm mb-6">Log in to continue your prep journey</p>
+    <button onclick="googleComingSoon()" class="w-full bg-glass-fill border border-glass-stroke text-on-surface rounded p-3 text-sm flex items-center justify-center gap-2 hover:bg-white/10 transition-all mb-1">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <p id="googleMsg" style="display:none" class="text-xs text-primary text-center mb-3">Google sign-in is coming soon — use your email below for now 🙂</p>
+    <div class="text-center text-xs text-on-surface-variant mb-4 mt-2">or</div>
+    <label class="text-xs text-on-surface-variant uppercase tracking-widest block mb-1">Email</label>
+    <input type="email" id="loginEmail" placeholder="your@college.edu" class="w-full bg-glass-fill border border-glass-stroke rounded p-3 text-on-surface text-sm mb-2 focus:outline-none focus:border-primary-container">
+    <p id="loginError" style="display:none" class="text-red-400 text-xs mb-3"></p>
+    <button onclick="doLogin()" class="w-full bg-primary-container text-white rounded p-3 text-sm font-medium hover:brightness-110 transition-all">Log in</button>
+    <p class="text-center text-xs text-on-surface-variant mt-4">New here? Just fill the form below — your account is created automatically. <span class="text-primary cursor-pointer hover:underline" onclick="closeLoginModal(); goToSignup();">Take me there</span></p>
+  </div>
 </div>
 
-<script>
-function showLoading() {
-    document.getElementById('submit-btn').style.display = 'none';
-    document.getElementById('loading').style.display = 'block';
+<!-- Navbar -->
+<nav class="fixed top-0 w-full bg-glass-fill backdrop-blur-xl border-b border-glass-stroke z-50">
+  <div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+    <div class="font-bold text-xl text-primary tracking-tight">PACER.AI</div>
+    <div class="hidden md:flex gap-3 text-sm font-medium">
+      <a href="/" class="text-primary border-b-2 border-primary pb-1 hover:bg-white/5 transition-all px-2">Home</a>
+      <a href="/interview" class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all px-2 py-1 rounded">Interview</a>
+      <a href="/history" class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all px-2 py-1 rounded">History</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="cycleMode()" id="modeBtn" class="bg-glass-fill border border-glass-stroke text-on-surface-variant rounded-full px-3 py-1.5 text-xs flex items-center gap-1.5 hover:border-primary transition-all">
+        <i class="ti ti-moon" id="modeIcon"></i>
+        <span id="modeLabel">Dark</span>
+      </button>
+      <div id="authArea" class="flex items-center gap-2"></div>
+    </div>
+  </div>
+</nav>
+
+<main class="flex-grow">
+  <!-- Hero -->
+  <section class="max-w-7xl mx-auto px-8 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
+      <!-- Left -->
+      <div class="md:col-span-7 flex flex-col gap-3 opacity-0 animate-fade-in-up">
+        <div class="inline-flex items-center gap-2 bg-accent-tint border border-[#6c63ff55] rounded-full px-3 py-1.5 text-xs text-primary w-fit">
+          <i class="ti ti-bolt"></i> AI placement coach — built for India
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-on-background leading-tight tracking-tight">
+          Get placed. <br>
+          <span class="text-primary-container">PACER coaches you<br>in Hinglish.</span>
+        </h1>
+        <p class="text-base text-on-surface max-w-xl leading-relaxed">
+          Master voice mock interviews and get instant WhatsApp job alerts. Practice in the language you actually think in. <em>Tension mat le.</em>
+        </p>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span class="bg-glass-fill border border-glass-stroke rounded-full px-3 py-1 text-xs text-on-surface-variant flex items-center gap-1"><i class="ti ti-check text-primary-container text-xs"></i>TCS</span>
+          <span class="bg-glass-fill border border-glass-stroke rounded-full px-3 py-1 text-xs text-on-surface-variant flex items-center gap-1"><i class="ti ti-check text-primary-container text-xs"></i>Infosys</span>
+          <span class="bg-glass-fill border border-glass-stroke rounded-full px-3 py-1 text-xs text-on-surface-variant flex items-center gap-1"><i class="ti ti-check text-primary-container text-xs"></i>Wipro</span>
+          <span class="bg-glass-fill border border-glass-stroke rounded-full px-3 py-1 text-xs text-on-surface-variant flex items-center gap-1"><i class="ti ti-check text-primary-container text-xs"></i>Google</span>
+          <span class="bg-glass-fill border border-glass-stroke rounded-full px-3 py-1 text-xs text-on-surface-variant flex items-center gap-1"><i class="ti ti-check text-primary-container text-xs"></i>Accenture</span>
+          <span class="bg-glass-fill border border-glass-stroke rounded-full px-3 py-1 text-xs text-on-surface-variant">+ more</span>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 mt-4">
+          <button onclick="goToSignup()" class="bg-primary-container text-white px-6 py-3 rounded text-sm font-medium hover:brightness-110 hover-glow transition-all active:scale-95">Start Free</button>
+        </div>
+        <p class="text-xs text-on-surface-variant mt-2">Free to use. No credit card. Just <em>taiyaar ho jao</em>.</p>
+      </div>
+
+      <!-- Right: Form Card -->
+      <div class="md:col-span-5 opacity-0 animate-fade-in-up delay-100" id="generate-form">
+        <div class="bg-surface-container-high/80 backdrop-blur-2xl border border-glass-stroke rounded-xl p-7 shadow-2xl shadow-black/80">
+          <div class="flex items-center gap-2 mb-5 border-b border-glass-stroke pb-4">
+            <i class="ti ti-brain text-2xl text-primary-container"></i>
+            <h2 class="font-semibold text-base text-on-background">Generate my questions</h2>
+          </div>
+          <form action="/generate" method="post" onsubmit="showLoading()" class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-xs text-white/50 block mb-1 uppercase tracking-widest">Name</label>
+                <input name="name" placeholder="Your Name" type="text" required class="w-full bg-[#ffffff0d] border border-[#ffffff22] rounded p-2.5 text-on-surface text-sm focus:border-primary-container focus:outline-none hover:bg-[#ffffff12] transition-all placeholder:text-white/20">
+              </div>
+              <div>
+                <label class="text-xs text-white/50 block mb-1 uppercase tracking-widest">Branch</label>
+                <input name="branch" placeholder="Branch" type="text" required class="w-full bg-[#ffffff0d] border border-[#ffffff22] rounded p-2.5 text-on-surface text-sm focus:border-primary-container focus:outline-none hover:bg-[#ffffff12] transition-all placeholder:text-white/20">
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-white/50 block mb-1 uppercase tracking-widest">Email</label>
+              <input name="email" placeholder="your@email.com" type="email" required class="w-full bg-[#ffffff0d] border border-[#ffffff22] rounded p-2.5 text-on-surface text-sm focus:border-primary-container focus:outline-none hover:bg-[#ffffff12] transition-all placeholder:text-white/20">
+            </div>
+            <div>
+              <label class="text-xs text-white/50 block mb-1 uppercase tracking-widest">Phone (WhatsApp)</label>
+              <input name="phone" placeholder="9876543210" type="text" required class="w-full bg-[#ffffff0d] border border-[#ffffff22] rounded p-2.5 text-on-surface text-sm focus:border-primary-container focus:outline-none hover:bg-[#ffffff12] transition-all placeholder:text-white/20">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-xs text-white/50 block mb-1 uppercase tracking-widest">CGPA</label>
+                <input name="cgpa" placeholder="CGPA" type="text" required class="w-full bg-[#ffffff0d] border border-[#ffffff22] rounded p-2.5 text-on-surface text-sm focus:border-primary-container focus:outline-none hover:bg-[#ffffff12] transition-all placeholder:text-white/20">
+              </div>
+              <div>
+                <label class="text-xs text-white/50 block mb-1 uppercase tracking-widest">Target Co.</label>
+                <input name="company" placeholder="TCS, Google, etc." type="text" required class="w-full bg-[#ffffff0d] border border-[#ffffff22] rounded p-2.5 text-on-surface text-sm focus:border-primary-container focus:outline-none hover:bg-[#ffffff12] transition-all placeholder:text-white/20">
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-white/50 block mb-1 uppercase tracking-widest">Skills</label>
+              <input name="skills" placeholder="Python, Java, SQL" type="text" required class="w-full bg-[#ffffff0d] border border-[#ffffff22] rounded p-2.5 text-on-surface text-sm focus:border-primary-container focus:outline-none hover:bg-[#ffffff12] transition-all placeholder:text-white/20">
+            </div>
+            <button id="submitBtn" type="submit" class="w-full mt-2 bg-primary-container/20 border border-primary-container text-primary text-sm py-3 rounded flex justify-center items-center gap-2 hover:bg-primary-container hover:text-white hover-glow transition-all duration-300">
+              <i class="ti ti-bolt text-lg"></i> Generate Mock
+            </button>
+            <div id="loadingState" style="display:none" class="text-center py-3">
+              <div class="spinner-purple mb-2"></div>
+              <p class="text-xs text-on-surface-variant">PACER is preparing your questions...</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="max-w-7xl mx-auto px-8 pb-20 opacity-0 animate-fade-in-up delay-200">
+    <div class="text-center mb-10">
+      <h2 class="text-2xl font-semibold text-on-background">Engineered for your success</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="bg-glass-fill backdrop-blur-sm border border-glass-stroke rounded-lg p-6 hover:bg-[#ffffff0c] hover-lift transition-all duration-300 group cursor-default opacity-0 animate-fade-in-up delay-100">
+        <div class="bg-accent-tint border border-[#6c63ff55] rounded-full w-12 h-12 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 group-hover:shadow-[0_0_15px_rgba(108,99,255,0.3)]">
+          <i class="ti ti-microphone text-primary text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-base text-on-background mb-2">Voice mock interviews</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Speak in Hinglish. PACER listens, scores on 5 axes, and gives honest feedback — like a strict senior who wants you to succeed.</p>
+      </div>
+      <div class="bg-glass-fill backdrop-blur-sm border border-glass-stroke rounded-lg p-6 hover:bg-[#ffffff0c] hover-lift transition-all duration-300 group cursor-default opacity-0 animate-fade-in-up delay-200">
+        <div class="bg-accent-tint border border-[#6c63ff55] rounded-full w-12 h-12 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 group-hover:shadow-[0_0_15px_rgba(108,99,255,0.3)]">
+          <i class="ti ti-brand-whatsapp text-primary text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-base text-on-background mb-2">WhatsApp job alerts</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Every morning PACER finds matching jobs and texts you before the deadline quietly passes. Never miss a drive again.</p>
+      </div>
+      <div class="bg-glass-fill backdrop-blur-sm border border-glass-stroke rounded-lg p-6 hover:bg-[#ffffff0c] hover-lift transition-all duration-300 group cursor-default opacity-0 animate-fade-in-up delay-300">
+        <div class="bg-accent-tint border border-[#6c63ff55] rounded-full w-12 h-12 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 group-hover:shadow-[0_0_15px_rgba(108,99,255,0.3)]">
+          <i class="ti ti-brain text-primary text-2xl"></i>
+        </div>
+        <h3 class="font-semibold text-base text-on-background mb-2">Smart memory</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">PACER remembers your weak spots from every session and drills them harder next time. Gets smarter the more you use it.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-10 bg-surface-container-lowest/80 backdrop-blur-lg border-t border-glass-stroke">
+  <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-2">
+    <div class="font-bold text-xl text-primary">PACER.AI</div>
+    <div class="text-sm text-on-surface-variant">© 2026 PACER.AI. Engineered for the next generation.</div>
+    <div class="flex gap-3 text-sm">
+      <a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</a>
+      <a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Terms of Service</a>
+      <a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Contact Support</a>
+    </div>
+  </div>
+</footer>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+varying vec2 v_texCoord;
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    float noise = sin(uv.x * 3.0 + u_time * 0.2) * cos(uv.y * 2.0 - u_time * 0.3);
+    float noise2 = sin(uv.y * 4.0 - u_time * 0.1) * cos(uv.x * 5.0 + u_time * 0.4);
+    vec3 color1 = vec3(0.06, 0.07, 0.10);
+    vec3 color2 = vec3(0.12, 0.08, 0.18);
+    vec3 accent = vec3(0.48, 0.23, 0.93);
+    float dist = distance(uv, mouse);
+    float glow = smoothstep(0.4, 0.0, dist) * 0.15;
+    vec3 finalColor = mix(color1, color2, (noise + noise2 + 1.0) * 0.5);
+    finalColor += accent * glow;
+    gl_FragColor = vec4(finalColor, 1.0);
 }
 </script>
 
+<script>
+function showLoading(){
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'block';
+}
+</script>
+<script src="/static/theme.js"></script>
 </body>
 </html>
